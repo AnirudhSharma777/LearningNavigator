@@ -1,0 +1,38 @@
+services:
+  mysql:
+    container_name: mysql-container
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword 
+      MYSQL_DATABASE: lmsDB
+      MYSQL_USER: user 
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - spring-lms
+    restart: unless-stopped
+  
+  spring-boot-app:
+    container_name: springboot
+    image: learning-navigator
+    ports:
+      - "8080:8080"
+    networks:
+      - spring-lms
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/lmsDB  # Update to use container name
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+
+networks:
+  spring-lms:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
